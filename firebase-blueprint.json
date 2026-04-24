@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "ExamAnalysis": {
+      "title": "Exam Analysis",
+      "description": "Results of an analysis of a past exam paper.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The UID of the user who uploaded the paper." },
+        "fileName": { "type": "string", "description": "The original name of the uploaded file." },
+        "uploadDate": { "type": "string", "format": "date-time", "description": "When the analysis was performed." },
+        "subject": { "type": "string", "description": "The subject of the exam paper." },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "frequency": { "type": "number" },
+              "importance": { "type": "number" }
+            }
+          }
+        },
+        "repeatedQuestions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "predictions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": { "type": "string" },
+              "probability": { "type": "number" },
+              "reasoning": { "type": "string" }
+            }
+          }
+        },
+        "confidenceScore": { "type": "number", "description": "System confidence in the analysis (0-1)." }
+      },
+      "required": ["userId", "fileName", "uploadDate", "subject"]
+    }
+  },
+  "firestore": {
+    "/exams/{examId}": {
+      "schema": "ExamAnalysis",
+      "description": "Stored exam analysis results."
+    }
+  }
+}

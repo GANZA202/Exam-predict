@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: exams
+    // Document ID: auto-generated
+    // Fields:
+    //   - userId: string (required) - Owner of the analysis
+    //   - fileName: string (required) - Original file name
+    //   - uploadDate: timestamp (required) - When uploaded
+    //   - subject: string (required) - Subject identified
+    //   - topics: list of maps (optional) - {name, frequency, importance}
+    //   - repeatedQuestions: list of strings (optional)
+    //   - predictions: list of maps (optional) - {topic, probability, reasoning}
+    //   - confidenceScore: number (optional) - 0 to 1
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidExam(data) {
+      return data.userId is string &&
+             data.fileName is string && data.fileName.size() > 0 && data.fileName.size() < 255 &&
+             data.subject is string && data.subject.size() < 100;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /exams/{examId} {
+      allow read: if isOwner(resource.data.userId);
+      
+      allow create: if isAuthenticated() && 
+                      isValidExam(request.resource.data) && 
+                      request.resource.data.userId == request.auth.uid;
+      
+      allow update: if isOwner(resource.data.userId) && 
+                      isValidExam(request.resource.data) &&
+                      request.resource.data.userId == resource.data.userId;
+      
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ExamPredict",
+  "description": "Smart exam paper analyzer that predicts likely topics and patterns from past papers using advanced data modeling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
